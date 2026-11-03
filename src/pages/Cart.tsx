@@ -1,79 +1,64 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Trash2 } from 'lucide-react';
-import { products } from '../data/products';
-import { Button } from '../components/ui/button';
-import { QuantityControl } from '../components/QuantityControl';
-import { CartState } from '../types';
+import { ShoppingBag, Trash2, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Button from '../components/ui/button';
+import QuantityControl from '../components/QuantityControl';
+import { products, formatRupiah } from '../data/products';
 
-const display = "font-['Bricolage_Grotesque',sans-serif]";
-const brand = "bg-[#123524] text-white hover:bg-[#1c4a33]";
-const accent = "bg-[#F2B632] text-[#123524] hover:bg-[#f6c555]";
+interface CartProps {
+  cart: { [key: number]: number };
+  onAddToCart: (id: number) => void;
+  onRemoveFromCart: (id: number) => void;
+  onClearItem: (id: number) => void;
+  onCheckout: () => void;
+}
 
-export const Cart = ({
-  cart, onAddToCart, onRemoveFromCart, onClearItem, onCheckout
-}: {
-  cart: CartState; onAddToCart: (id: number) => void; onRemoveFromCart: (id: number) => void; onClearItem: (id: number) => void; onCheckout: () => void;
-}) => {
-  const navigate = useNavigate();
+export default function Cart({ cart, onAddToCart, onRemoveFromCart, onClearItem, onCheckout }: CartProps) {
   const cartItems = products.filter((p) => (cart[p.id] || 0) > 0).map((p) => ({ ...p, quantity: cart[p.id] }));
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  if (cartItems.length === 0) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 text-center">
-        <ShoppingBag className="mx-auto h-10 w-10 text-zinc-300" />
-        <h1 className={`${display} mt-5 text-3xl font-extrabold text-[#123524]`}>Keranjang kosong</h1>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-zinc-500">Tambahkan produk dari katalog, lalu kembali ke sini untuk checkout.</p>
-        <Link to="/products" className="mt-6 inline-block">
-          <Button variant="emerald" size="lg" className={brand}>Lihat produk</Button>
-        </Link>
-      </div>
-    );
-  }
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <h1 className={`${display} text-4xl font-extrabold tracking-tight text-[#123524]`}>Keranjang</h1>
-      <p className="mt-1 text-sm text-zinc-500">{totalQty} barang dari {cartItems.length} produk</p>
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      <h1 className="text-3xl font-extrabold text-zinc-900 mb-2">Keranjang Belanja</h1>
+      <p className="text-zinc-500 mb-8">{totalItems} barang di dalam keranjang Anda.</p>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
-        <ul className="divide-y divide-zinc-200 border-y border-zinc-200">
-          {cartItems.map((item) => (
-            <li key={item.id} className="flex items-center gap-4 py-5">
-              <Link to={`/products/${item.id}`} className="shrink-0">
-                <img src={item.image} alt={item.name} className="h-20 w-20 rounded-lg bg-zinc-100 object-cover" />
-              </Link>
-              <div className="min-w-0 flex-1">
-                <Link to={`/products/${item.id}`} className="block truncate font-semibold text-zinc-900 hover:underline">{item.name}</Link>
-                <p className="mt-0.5 text-sm text-zinc-500">Rp {item.price.toLocaleString('id-ID')} per item</p>
-                <p className="mt-1 font-bold text-[#123524]">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
+      {cartItems.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-zinc-100 p-12 text-center shadow-xs">
+          <ShoppingBag className="w-16 h-16 text-zinc-300 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-zinc-800 mb-4">Keranjang belanja masih kosong</h3>
+          <Link to="/products"><Button variant="primary" size="lg">Mulai Belanja</Button></Link>
+        </div>
+      ) : (
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex-1 space-y-4">
+            {cartItems.map((item) => (
+              <div key={item.id} className="bg-white rounded-2xl border border-zinc-100 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-4">
+                  <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover" />
+                  <div>
+                    <h3 className="font-bold text-zinc-900">{item.name}</h3>
+                    <p className="text-zinc-900 font-bold">{formatRupiah(item.price)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-end space-x-4">
+                  <Button variant="ghost" size="icon" onClick={() => onClearItem(item.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="w-5 h-5" /></Button>
+                  <QuantityControl qty={item.quantity} onIncrement={() => onAddToCart(item.id)} onDecrement={() => onRemoveFromCart(item.id)} />
+                </div>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <QuantityControl qty={item.quantity} onIncrement={() => onAddToCart(item.id)} onDecrement={() => onRemoveFromCart(item.id)} size="sm" />
-                <Button variant="danger" size="icon" onClick={() => onClearItem(item.id)} aria-label={`Hapus ${item.name}`}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-
-        <aside className="rounded-xl bg-[#123524] p-6 text-white lg:sticky lg:top-24">
-          <h2 className={`${display} text-lg font-bold`}>Ringkasan</h2>
-          <dl className="mt-4 space-y-2 text-sm text-white/75">
-            <div className="flex justify-between"><dt>Jumlah barang</dt><dd>{totalQty}</dd></div>
-          </dl>
-          <div className="mt-4 border-t border-white/20 pt-4">
-            <p className="text-sm text-white/75">Total pembayaran</p>
-            <p className={`${display} mt-1 text-3xl font-extrabold`}>Rp {totalPrice.toLocaleString('id-ID')}</p>
+            ))}
           </div>
-          <Button variant="brand" size="lg" className={`mt-6 w-full font-bold ${accent}`} onClick={() => { onCheckout(); navigate('/'); }}>
-            Bayar sekarang
-          </Button>
-        </aside>
-      </div>
+
+          <div className="w-full lg:w-[380px]">
+            <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-lg sticky top-24">
+              <h2 className="text-lg font-bold text-zinc-900 mb-4 pb-4 border-b border-zinc-100">Ringkasan Belanja</h2>
+              <div className="flex justify-between mb-4"><span className="text-zinc-600">Total Harga</span><span className="font-semibold">{formatRupiah(totalPrice)}</span></div>
+              <div className="flex justify-between mb-6 pb-6 border-b border-zinc-100"><span className="text-base font-bold text-zinc-900">Total Tagihan</span><span className="text-xl font-extrabold text-blue-600">{formatRupiah(totalPrice)}</span></div>
+              <Button variant="primary" size="lg" className="w-full py-6" onClick={onCheckout}><ShieldCheck className="w-5 h-5 mr-2" /> Bayar Sekarang</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}

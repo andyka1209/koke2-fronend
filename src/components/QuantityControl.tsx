@@ -9,9 +9,7 @@ interface QuantityControlProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export const QuantityControl: React.FC<QuantityControlProps> = ({ 
-  qty, onIncrement, onDecrement, className = "", size = 'md' 
-}) => {
+export default function QuantityControl({ qty, onIncrement, onDecrement, className = "", size = 'md' }: QuantityControlProps) {
   const isSm = size === 'sm';
   const isLg = size === 'lg';
 
@@ -23,9 +21,9 @@ export const QuantityControl: React.FC<QuantityControlProps> = ({
       <span className={`font-bold text-zinc-800 px-2 text-center select-none ${isSm ? 'text-xs min-w-[20px]' : isLg ? 'text-base min-w-[32px]' : 'text-sm min-w-[24px]'}`}>
         {qty}
       </span>
-      <button onClick={onIncrement} className={`${isSm ? 'w-7 h-7' : isLg ? 'w-10 h-10' : 'w-8 h-8'} rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 flex items-center justify-center transition-all shadow-xs`}>
+      <button onClick={onIncrement} className={`${isSm ? 'w-7 h-7' : isLg ? 'w-10 h-10' : 'w-8 h-8'} rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:scale-95 flex items-center justify-center transition-all shadow-xs`}>
         <Plus className={isSm ? "w-3 h-3" : isLg ? "w-4 h-4" : "w-3.5 h-3.5"} />
       </button>
     </div>
   );
-};
+}

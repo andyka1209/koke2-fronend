@@ -1,49 +1,22 @@
-import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { products } from "./data/products";
-import { CartState } from "./types/index";
-import { Navbar } from "./components/Navbar";
-import { Toast } from "./components/ui/toast";
-import { Home } from "./pages/Home";
-import { Products } from "./pages/Products";
-import { ProductDetail } from "./pages/ProductDetail";
-import { Cart } from "./pages/Cart";
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
+import Cart from './pages/Cart';
+import { products } from './data/products';
 
-const CART_KEY = "xstore-cart";
-
-// Baca keranjang dari localStorage; abaikan data yang rusak atau tidak valid
-const loadCart = (): CartState => {
-  try {
-    const saved = localStorage.getItem(CART_KEY);
-    if (!saved) return {};
-    const parsed = JSON.parse(saved) as Record<string, unknown>;
-    const clean: CartState = {};
-    for (const [id, qty] of Object.entries(parsed)) {
-      if (typeof qty === "number" && qty > 0 && products.some((p) => p.id === Number(id))) {
-        clean[Number(id)] = qty;
-      }
-    }
-    return clean;
-  } catch {
-    return {};
-  }
-};
-
-export default function App() {
-  const [cart, setCart] = useState<CartState>(loadCart);
+function AppContent() {
+  const navigate = useNavigate();
+  // State keranjang diawali dengan 4 barang 
+  const [cart, setCart] = useState<{ [key: number]: number }>({ 1: 2, 2: 2 });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    } catch {
-      // abaikan jika penyimpanan penuh atau diblokir
-    }
-  }, [cart]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2000);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleAddToCart = (id: number) => {
@@ -64,36 +37,51 @@ export default function App() {
     });
   };
 
-  const handleClearItem = (id: number) => {
-    setCart((prev) => {
-      const updated = { ...prev };
-      delete updated[id];
-      return updated;
-    });
-  };
+  const handleClearItem = (id: number) => setCart((prev) => { const updated = { ...prev }; delete updated[id]; return updated; });
 
   const handleCheckout = () => {
     setCart({});
-    showToast("Pesanan berhasil dibuat!");
+    showToast("Pembayaran Berhasil! Pesanan sedang diproses.");
+    navigate('/'); 
   };
 
   const totalCartCount = Object.values(cart).reduce((sum, q) => sum + q, 0);
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-zinc-50/50 text-zinc-900 flex flex-col font-sans antialiased">
-        <Toast message={toastMessage} />
-        <Navbar totalCartCount={totalCartCount} />
+    <div className="min-h-screen bg-zinc-50/50 text-zinc-900 font-sans">
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center space-x-3 font-bold animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 className="w-6 h-6 text-white" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products cart={cart} onAddToCart={handleAddToCart} onRemoveFromCart={handleRemoveFromCart} />} />
-            <Route path="/products/:id" element={<ProductDetail cart={cart} onAddToCart={handleAddToCart} onRemoveFromCart={handleRemoveFromCart} />} />
-            <Route path="/cart" element={<Cart cart={cart} onAddToCart={handleAddToCart} onRemoveFromCart={handleRemoveFromCart} onClearItem={handleClearItem} onCheckout={handleCheckout} />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+      <Navbar totalCartCount={totalCartCount} />
+      
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products onAddToCart={handleAddToCart} />} />
+          <Route path="/products/:id" element={<ProductDetail onAddToCart={handleAddToCart} />} />
+          <Route path="/cart" element={
+            <Cart 
+              cart={cart} 
+              onAddToCart={handleAddToCart} 
+              onRemoveFromCart={handleRemoveFromCart} 
+              onClearItem={handleClearItem} 
+              onCheckout={handleCheckout} 
+            />
+          } />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }

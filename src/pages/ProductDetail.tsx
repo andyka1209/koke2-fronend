@@ -1,70 +1,30 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronRight, Plus } from 'lucide-react';
-import { products } from '../data/products';
-import { Button } from '../components/ui/button';
-import { QuantityControl } from '../components/QuantityControl';
-import { CartState } from '../types';
+import { ArrowLeft } from 'lucide-react';
+import Button from '../components/ui/button';
+import { products, formatRupiah } from '../data/products';
 
-const focus: Record<number, string> = { 1: 'object-right' };
-const display = "font-['Bricolage_Grotesque',sans-serif]";
-const brand = "bg-[#123524] text-white hover:bg-[#1c4a33]";
-
-export const ProductDetail = ({
-  cart, onAddToCart, onRemoveFromCart
-}: {
-  cart: CartState; onAddToCart: (id: number) => void; onRemoveFromCart: (id: number) => void;
-}) => {
-  const { id } = useParams();
+export default function ProductDetail({ onAddToCart }: { onAddToCart: (id: number) => void }) {
+  const { id } = useParams<{ id: string }>();
   const product = products.find((p) => p.id === Number(id));
 
-  if (!product) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <h2 className={`${display} text-2xl font-bold text-zinc-900`}>Produk tidak ditemukan</h2>
-        <p className="mt-2 text-sm text-zinc-500">Produk ini mungkin sudah dihapus atau tautannya salah.</p>
-        <Link to="/products"><Button variant="outline" className="mt-5">Kembali ke produk</Button></Link>
-      </div>
-    );
-  }
-
-  const qty = cart[product.id] || 0;
+  if (!product) return <div className="py-20 text-center font-bold">Produk tidak ditemukan.</div>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-zinc-500" aria-label="Breadcrumb">
-        <Link to="/products" className="hover:text-zinc-900">Produk</Link>
-        <ChevronRight className="h-3.5 w-3.5" />
-        <span className="text-zinc-900">{product.name}</span>
-      </nav>
-
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-        <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-100">
-          <img src={product.image} alt={product.name} className={`h-full w-full object-cover ${focus[product.id] ?? ''}`} />
-        </div>
-
-        <div className="flex flex-col justify-center">
-          <p className="text-sm font-medium text-zinc-500">{product.category}</p>
-          <h1 className={`${display} mt-1 text-4xl font-extrabold tracking-tight text-[#123524]`}>{product.name}</h1>
-          <p className="mt-4 inline-block w-fit rounded-md bg-[#F2B632] px-3 py-1 text-xl font-bold text-[#123524]">
-            Rp {product.price.toLocaleString('id-ID')}
-          </p>
-          <p className="mt-6 max-w-prose text-base leading-relaxed text-zinc-600">{product.description}</p>
-
-          <div className="mt-8 border-t border-zinc-200 pt-6">
-            {qty > 0 ? (
-              <div className="flex items-center gap-4">
-                <QuantityControl qty={qty} onIncrement={() => onAddToCart(product.id)} onDecrement={() => onRemoveFromCart(product.id)} size="lg" className="flex-1" />
-                <Link to="/cart"><Button variant="outline" size="lg">Buka keranjang</Button></Link>
-              </div>
-            ) : (
-              <Button variant="brand" size="lg" className={`w-full ${brand}`} onClick={() => onAddToCart(product.id)}>
-                <Plus className="h-4 w-4" /> Tambah ke keranjang
-              </Button>
-            )}
-          </div>
+    <div className="max-w-4xl mx-auto px-4 py-10">
+      <Link to="/products" className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 mb-6">
+        <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Katalog
+      </Link>
+      <div className="bg-white rounded-3xl border border-zinc-100 p-6 md:p-8 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <img src={product.image} alt={product.name} className="w-full h-auto aspect-square object-cover rounded-2xl bg-zinc-50" />
+        <div>
+          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-100">{product.category}</span>
+          <h1 className="text-3xl font-extrabold text-zinc-900 mt-3 mb-2">{product.name}</h1>
+          <p className="text-2xl font-black text-blue-600 mb-6">{formatRupiah(product.price)}</p>
+          <p className="text-zinc-600 mb-8">{product.description}</p>
+          <Button variant="primary" size="lg" className="w-full" onClick={() => onAddToCart(product.id)}>Tambahkan ke Keranjang</Button>
         </div>
       </div>
     </div>
   );
-};
+}

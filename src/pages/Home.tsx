@@ -1,46 +1,51 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { products } from '../data/products';
-import { Button } from '../components/ui/button';
+import Button from '../components/ui/button';
 
-const focus: Record<number, string> = { 1: 'object-right' };
-
-const display = "font-['Bricolage_Grotesque',sans-serif]";
-const brand = "bg-[#123524] text-white hover:bg-[#1c4a33]";
-
-export const Home = () => {
-  const picks = products.slice(0, 4);
+export default function Home() {
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20 grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
-      <div>
-        <h1 className={`${display} text-5xl sm:text-7xl font-extrabold tracking-tight leading-[1.02] text-[#123524]`}>
-          Produk pilihan, harga yang jelas.
+    <div className="flex flex-col items-center pt-24 pb-0 px-4 min-h-[85vh] bg-white overflow-hidden">
+      
+      {/* Teks Hero ala Apple */}
+      <div className="text-center max-w-3xl z-10">
+        <h2 className="text-xs md:text-sm font-bold tracking-widest text-zinc-400 uppercase mb-3">
+          Koleksi Terbaru 2026
+        </h2>
+        <h1 className="text-7xl md:text-[7rem] font-black text-zinc-900 tracking-tighter mb-4 leading-none">
+          VSC Store.
         </h1>
-        <p className="mt-6 max-w-md text-lg leading-relaxed text-zinc-600">
-          Temukan berbagai produk menarik dengan harga terbaik hanya di XStore
+        <p className="text-2xl md:text-3xl text-zinc-600 font-medium mb-10 tracking-tight">
+          Halo, masa depan.
         </p>
-        <Link to="/products" className="mt-8 inline-block">
-          <Button variant="brand" size="lg" className={`${brand} px-6`}>
-            Lihat semua produk <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
+        
+        {/* Tombol Kapsul (Pill-shaped) */}
+        <div className="flex items-center justify-center gap-4">
+          <Link to="/products">
+            <Button variant="primary" size="lg" className="rounded-full px-8 text-base">
+              Beli Sekarang
+            </Button>
+          </Link>
+          <Link to="/products">
+            <Button variant="outline" size="lg" className="rounded-full px-8 text-base bg-transparent border-blue-600 text-blue-600 hover:bg-blue-50">
+              Selengkapnya
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {picks.map((p, i) => (
-          <Link
-            key={p.id}
-            to={`/products/${p.id}`}
-            className={`relative block overflow-hidden rounded-xl bg-zinc-100 aspect-square ${i % 2 === 1 ? 'mt-10' : ''}`}
-          >
-            <img src={p.image} alt={p.name} className={`h-full w-full object-cover ${focus[p.id] ?? ''}`} />
-            <span className="absolute bottom-3 left-3 rounded-md bg-[#F2B632] px-2.5 py-1 text-sm font-bold text-[#123524]">
-              Rp {p.price.toLocaleString('id-ID')}
-            </span>
-          </Link>
-        ))}
+      {/* Gambar Showcase bergaya elegan di bagian bawah */}
+      <div className="mt-20 w-full max-w-5xl relative">
+        {/* Efek gradasi putih untuk menyamarkan batas bawah gambar */}
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div>
+        
+        <img 
+          // Menggunakan gambar Smart Watch dari data produk kamu sebagai showcase
+          src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80" 
+          alt="VSC Store Showcase" 
+          className="w-full h-auto object-cover rounded-t-[2.5rem] md:rounded-t-[4rem] shadow-2xl border-t border-x border-zinc-200/60"
+          style={{ maxHeight: '550px', objectPosition: 'center 30%' }}
+        />
       </div>
-    </section>
+    </div>
   );
-};
+}

@@ -6,7 +6,6 @@ export type Product = {
   description: string;
   image: string;
 };
-
 export type CartState = {
   [key: number]: number;
 };
